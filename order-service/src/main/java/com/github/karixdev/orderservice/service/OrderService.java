@@ -7,6 +7,9 @@ import com.github.karixdev.orderservice.mapper.OrderDtoMapper;
 import com.github.karixdev.orderservice.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,6 +26,12 @@ public class OrderService {
                 .build());
 
         return mapper.map(order);
+    }
+
+    public Page<OrderResponse> getAll(Integer page, Integer size) {
+        Pageable pageRequest = PageRequest.of(page, size);
+
+        return repository.findAll(pageRequest).map(mapper::map);
     }
 }
 
