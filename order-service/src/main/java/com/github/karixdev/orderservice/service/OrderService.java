@@ -38,8 +38,18 @@ public class OrderService {
     }
 
     public OrderResponse getById(UUID id) {
+        return mapper.map(getByIdOrThrow(id));
+    }
+
+    @Transactional
+    public void delete(UUID id) {
+        Order order = getByIdOrThrow(id);
+
+        repository.delete(order);
+    }
+
+    private Order getByIdOrThrow(UUID id) {
         return repository.findById(id)
-                .map(mapper::map)
                 .orElseThrow(() -> {
                     throw new NotFoundException(
                             "Order with provided id not found");
