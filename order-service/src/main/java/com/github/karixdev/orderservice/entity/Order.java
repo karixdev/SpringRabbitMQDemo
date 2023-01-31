@@ -42,7 +42,8 @@ public class Order {
             name = "has_been_sent",
             nullable = false
     )
-    private Boolean hasBeenSent;
+    @Builder.Default
+    private Boolean hasBeenSent = false;
 
     @Override
     public boolean equals(Object o) {
