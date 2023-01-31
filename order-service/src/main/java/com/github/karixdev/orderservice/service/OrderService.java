@@ -3,6 +3,7 @@ package com.github.karixdev.orderservice.service;
 import com.github.karixdev.orderservice.dto.OrderRequest;
 import com.github.karixdev.orderservice.dto.OrderResponse;
 import com.github.karixdev.orderservice.entity.Order;
+import com.github.karixdev.orderservice.exception.NotFoundException;
 import com.github.karixdev.orderservice.mapper.OrderDtoMapper;
 import com.github.karixdev.orderservice.repository.OrderRepository;
 import jakarta.transaction.Transactional;
@@ -11,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +35,15 @@ public class OrderService {
         Pageable pageRequest = PageRequest.of(page, size);
 
         return repository.findAll(pageRequest).map(mapper::map);
+    }
+
+    public OrderResponse getById(UUID id) {
+        return repository.findById(id)
+                .map(mapper::map)
+                .orElseThrow(() -> {
+                    throw new NotFoundException(
+                            "Order with provided id not found");
+                });
     }
 }
 

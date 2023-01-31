@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @Controller
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
@@ -33,6 +35,16 @@ public class OrderController {
     ) {
         return new ResponseEntity<>(
                 service.getAll(page, size),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderResponse> getById(
+            @PathVariable(name = "id") UUID id
+    ) {
+        return new ResponseEntity<>(
+                service.getById(id),
                 HttpStatus.OK
         );
     }
