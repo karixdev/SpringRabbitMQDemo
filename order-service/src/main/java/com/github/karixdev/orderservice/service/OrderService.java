@@ -2,12 +2,14 @@ package com.github.karixdev.orderservice.service;
 
 import com.github.karixdev.orderservice.dto.OrderRequest;
 import com.github.karixdev.orderservice.dto.OrderResponse;
+import com.github.karixdev.orderservice.dto.OrderUpdateRequest;
 import com.github.karixdev.orderservice.entity.Order;
 import com.github.karixdev.orderservice.exception.NotFoundException;
 import com.github.karixdev.orderservice.mapper.OrderDtoMapper;
 import com.github.karixdev.orderservice.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -46,6 +48,19 @@ public class OrderService {
         Order order = getByIdOrThrow(id);
 
         repository.delete(order);
+    }
+
+    @Transactional
+    public OrderResponse update(UUID id, OrderUpdateRequest payload) {
+        Order order = getByIdOrThrow(id);
+
+        order.setEmail(payload.email());
+        order.setProductId(payload.productId());
+        order.setHasBeenSent(payload.hasBeenSent());
+
+        repository.save(order);
+
+        return mapper.map(order);
     }
 
     private Order getByIdOrThrow(UUID id) {

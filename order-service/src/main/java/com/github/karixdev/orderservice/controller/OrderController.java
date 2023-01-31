@@ -2,6 +2,7 @@ package com.github.karixdev.orderservice.controller;
 
 import com.github.karixdev.orderservice.dto.OrderRequest;
 import com.github.karixdev.orderservice.dto.OrderResponse;
+import com.github.karixdev.orderservice.dto.OrderUpdateRequest;
 import com.github.karixdev.orderservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -57,6 +58,17 @@ public class OrderController {
 
         return new ResponseEntity<>(
                 HttpStatus.NO_CONTENT
+        );
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<OrderResponse> update(
+            @PathVariable(name = "id") UUID id,
+            @RequestBody OrderUpdateRequest payload
+    ) {
+        return new ResponseEntity<>(
+                service.update(id, payload),
+                HttpStatus.OK
         );
     }
 }
