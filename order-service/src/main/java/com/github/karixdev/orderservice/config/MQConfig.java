@@ -10,6 +10,28 @@ import org.springframework.amqp.support.converter.MessageConverter;
 
 @Configuration
 public class MQConfig {
+    public static final String EMAIL_QUEUE = "email_queue";
+    public static final String EMAIL_EXCHANGE = "email_exchange";
+    public static final String EMAIL_ROUTING_KEY = "email_routing";
+
+    @Bean
+    Queue emailQueue() {
+        return new Queue(EMAIL_QUEUE);
+    }
+
+    @Bean
+    TopicExchange emailExchange() {
+        return new TopicExchange(EMAIL_EXCHANGE);
+    }
+
+    @Bean
+    Binding emailBinding() {
+        return BindingBuilder
+                .bind(emailQueue())
+                .to(emailExchange())
+                .with(EMAIL_ROUTING_KEY);
+    }
+    
     @Bean
     MessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();

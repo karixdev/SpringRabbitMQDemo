@@ -1,5 +1,7 @@
 package com.github.karixdev.orderservice.service;
 
+import com.github.karixdev.orderservice.config.MQConfig;
+import com.github.karixdev.orderservice.dto.EmailRequest;
 import com.github.karixdev.orderservice.dto.OrderRequest;
 import com.github.karixdev.orderservice.dto.OrderResponse;
 import com.github.karixdev.orderservice.dto.OrderUpdateRequest;
@@ -9,7 +11,7 @@ import com.github.karixdev.orderservice.mapper.OrderDtoMapper;
 import com.github.karixdev.orderservice.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.ast.Or;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,7 @@ import java.util.UUID;
 public class OrderService {
     private final OrderRepository repository;
     private final OrderDtoMapper mapper;
+    private final RabbitTemplate rabbitTemplate;
 
     @Transactional
     public OrderResponse create(OrderRequest payload) {
@@ -29,6 +32,16 @@ public class OrderService {
                 .email(payload.email())
                 .productId(payload.productId())
                 .build());
+
+        EmailRequest emailRequest = EmailRequest.builder()
+                .topic("Order placed")
+                .recipientEmail(order.getEmail())
+                .body(String.format(
+                        "Your order has been placed with following product: %s",
+                        order.getId().toString()))
+                .build();
+
+        sendEmailMessage(emailRequest);
 
         return mapper.map(order);
     }
@@ -60,6 +73,16 @@ public class OrderService {
 
         repository.save(order);
 
+        if (order.getHasBeenSent()) {
+            EmailRequest emailRequest = EmailRequest.builder()
+                    .topic("Order update")
+                    .recipientEmail(order.getEmail())
+                    .body("Your order has been sent")
+                    .build();
+
+            sendEmailMessage(emailRequest);
+        }
+
         return mapper.map(order);
     }
 
@@ -69,6 +92,14 @@ public class OrderService {
                     throw new NotFoundException(
                             "Order with provided id not found");
                 });
+    }
+
+    private void sendEmailMessage(EmailRequest payload) {
+        rabbitTemplate.convertAndSend(
+                MQConfig.EMAIL_EXCHANGE,
+                MQConfig.EMAIL_ROUTING_KEY,
+                payload
+        );
     }
 }
 
