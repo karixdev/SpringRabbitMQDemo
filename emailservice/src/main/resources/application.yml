@@ -1,0 +1,19 @@
+server:
+  port: 8081
+
+spring:
+  mail:
+    properties:
+      auth: false
+      mail:
+        smtp:
+          starttls:
+            enable: false
+
+    host: localhost
+    port: 1025
+
+  rabbitmq:
+    addresses: localhost:5672
+    password: password
+    username: user
